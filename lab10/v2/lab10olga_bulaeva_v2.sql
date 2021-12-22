@@ -1,69 +1,72 @@
-/* С‚Р°Р±Р»РёС†Р° С†РµС…РѕРІ-РёР·РіРѕС‚РѕРІРёС‚РµР»РµР№ */
-CREATE TABLE workshops (
-    id           INTEGER      PRIMARY KEY AUTOINCREMENT
-                              NOT NULL,
-    workshopName VARCHAR (40) NOT NULL
-);
+CREATE DATABASE LAB10
+USE LAB10
 
-/* С‚Р°Р±Р»РёС†Р° РїСЂРѕРґСѓРєС‚РѕРІ */
-CREATE TABLE products (
-    id             INTEGER      PRIMARY KEY AUTOINCREMENT
-                                NOT NULL,
-    productName    VARCHAR (40) NOT NULL,
-    measureUnit    VARCHAR (10) NOT NULL,
-    workshopID     INTEGER      NOT NULL,
-    productGroupID INTEGER      NOT NULL,
-    cost           DECIMAL      NOT NULL
-);
+/* таблица цехов-изготовителей */
+CREATE TABLE [workshops]
+(
+	id INTEGER IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	workshopName VARCHAR (40) NOT NULL
+)
 
-/* РїР»Р°РЅ РёР·РіРѕС‚РѕРІР»РµРЅРёСЏ */
-CREATE TABLE [plan] (
-    productID    INTEGER NOT NULL,
-    productCount DOUBLE  NOT NULL,
-    monthNumber  INTEGER NOT NULL
-);
+/* таблица продуктов */
+CREATE TABLE [products]
+(
+	id INTEGER IDENTITY (1, 1) NOT NULL PRIMARY KEY,
+	productName VARCHAR (40) NOT NULL,
+	measureUnit VARCHAR (10) NOT NULL,
+    workshopID INTEGER NOT NULL,
+    productGroupID INTEGER NOT NULL,
+    cost DECIMAL NOT NULL
+)
 
-/* Р·Р°РґР°РЅРёРµ 3 */
-select productGroups.groupName, count(*) 
-from products 
-join productGroups on products.productGroupID = productGroups.id
-group by products.productGroupID
+/* таблица плана изготовления */
+CREATE TABLE [plan]
+(
+	productID INTEGER NOT NULL,
+	productCount FLOAT NOT NULL,
+	monthNumber INTEGER NOT NULL
+)
 
-/* Р·Р°РґР°РЅРёРµ 4 */
-
-/* РіСЂСѓРїРїС‹ РїСЂРѕРґСѓРєС‚РѕРІ */
-CREATE TABLE productGroups (
-    id        INTEGER      PRIMARY KEY AUTOINCREMENT
-                           NOT NULL,
+/* задание 4 */
+CREATE TABLE [productGroups] (
+    id INTEGER IDENTITY (1, 1) PRIMARY KEY,
     groupName VARCHAR (40) NOT NULL
 );
 
-/* Р·Р°РґР°РЅРёРµ 5 */
-insert into productGroups (groupName) values ("Р±РѕР»С‚С‹")
+/* задание 3 */
+SELECT [productGroups].[groupName], count(*) 
+FROM [products]
+JOIN [productGroups] ON [products].[productGroupID] = [productGroups].[id]
+GROUP BY [productGroups].[groupName]
 
-/* Р·Р°РґР°РЅРёРµ 6 */
-select productGroups.groupName, products.productName, [plan].monthNumber, [plan].productCount * products.cost
-from products
-join productGroups on products.productGroupID = productGroups.id
-join [plan] on [plan].productID = products.id
 
-/* Р·Р°РґР°РЅРёРµ 7 */
-update products set cost = cost + (cost * 0.5)
+/* задание 5 */
+INSERT INTO [productGroups] ([groupName]) VALUES ('болты')
 
-/* Р·Р°РґР°РЅРёРµ 8 */
-select products.productName, sum([plan].productCount * products.cost) 
-from products
-join [plan] on [plan].productID = products.id
-group by [plan].productID
 
-/* Р·Р°РґР°РЅРёРµ 9 */
-select productGroups.groupName, sum(products.cost) 
-from products 
-join productGroups on products.productGroupID = productGroups.id
-group by products.productGroupID
+/* задание 6 */
+SELECT [productGroups].[groupName], [products].[productName], [plan].[monthNumber], [plan].[productCount] * [products].[cost]
+FROM [products]
+JOIN [productGroups] ON [products].[productGroupID] = [productGroups].[id]
+JOIN [plan] ON [plan].[productID] = [products].[id]
 
-/* Р·Р°РґР°РЅРёРµ 10 */
-select products.productName 
-from products
-join [plan] on products.id = [plan].productID
-where [plan].productCount < (select avg([plan].productCount) from [plan])
+/* задание 7 */
+UPDATE [products] SET [products].[cost] = [products].[cost] + ([products].[cost] / 2)
+
+/* задание 8 */
+SELECT [products].[productName], sum([plan].[productCount] * [products].[cost]) 
+FROM [products]
+JOIN [plan] ON [plan].[productID] = [products].[id]
+GROUP BY [products].[productName]
+
+/* задание 9 */
+SELECT [productGroups].[groupName], sum([products].[cost]) 
+FROM [products] 
+JOIN [productGroups] ON [products].[productGroupID] = [productGroups].[id]
+GROUP BY [productGroups].[groupName]
+
+/* задание 10 */
+SELECT [products].[productName] 
+FROM [products]
+JOIN [plan] ON [products].[id] = [plan].[productID]
+WHERE [plan].[productCount] < (SELECT avg([plan].[productCount]) FROM [plan])
